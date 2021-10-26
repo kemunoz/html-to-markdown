@@ -7,7 +7,6 @@ from os import remove
 from os import listdir
 from os.path import isfile, join, isdir, relpath
 import shutil
-import time
 import queue
 
 
@@ -27,6 +26,8 @@ images = {}
 rootpath = "~/"
 q = queue.Queue()
 mypath = os.getcwd()
+string = mypath.split('\\')
+mypath = "/".join(string)
 filedict = {
     "AP-OVERVIEW.htm": "AP-OVERVIEW",
     "AP-OVERVIEW.htm": "AP-OVERVIEW",
@@ -45,7 +46,7 @@ filedict = {
 }
 linkset = {}
 for key in filedict:
-    filedict[key] = join(mypath, filedict[key])
+    filedict[key] = mypath + '/' + filedict[key]
 
 visited = set()
 
@@ -83,7 +84,7 @@ def get_images(soup):
 
 
 def get_relative(root, storedpath):
-    string = storedpath.split('site\\')[1]
+    string = storedpath.split('site/')[1]
     return root + string
 
 # This function returns a string that points to the site/ folder
@@ -92,12 +93,12 @@ def get_relative(root, storedpath):
 def get_root_string(height):
     str = ""
     for i in range(0, height):
-        str += '..\\'
+        str += '../'
     return str
 
 
 def get_height(path):
-    tokens = path.split('\\')
+    tokens = path.split('/')
     tokens.reverse()
     height = 0
     for token in tokens:
@@ -123,10 +124,10 @@ def get_links(parentfolder, soup):
             #   filedict[parentfolder], childfolder))
             #atag['href'] = relative
         elif valid_link(href):
-            currpath = join(filedict[parentfolder], childfolder)
+            currpath = filedict[parentfolder] + '/' + childfolder
             filedict[href] = currpath
             atag['href'] = get_prepend_diff(
-                currpath, parentfolder) + "\\README.md"
+                currpath, parentfolder) + "/README.md"
             links.append(href)
         else:
             atag.decompose
@@ -134,7 +135,7 @@ def get_links(parentfolder, soup):
 
 
 def get_prepend_diff(currpath, parentfolder):
-    tokens = currpath.split('\\')
+    tokens = currpath.split('/')
     parent = parentfolder.split('.')[0]
     toconcat = False
     path = []
@@ -144,7 +145,7 @@ def get_prepend_diff(currpath, parentfolder):
         if str == parent:
             toconcat = True
 
-    return '\\'.join(path)
+    return '/'.join(path)
 
 
 # Helper function to create directory
@@ -219,7 +220,7 @@ def write_to_readme(content, path):
 def visit(file):
     # Path is the path to the file directory
     # example for AP-Overview it will be C://Users/kevinm/desktop/M3Doc/AP-Overview
-    path = join(mypath, file)
+    path = mypath + '/' + file
     content = sanitize_html(path)
     # Create soup object from sanitized html
     soup = BeautifulSoup(content, 'html.parser')
